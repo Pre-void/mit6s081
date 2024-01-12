@@ -19,7 +19,7 @@ int main(int argc,char * argv[]){
 
         read(pipes1[0],child_recv_buf,1);
         printf("%d: received ping\n", pid);
-        printf("%d: received number %d\n",pid ,child_recv_buf);
+        printf("%d: received number %d\n",pid ,child_recv_buf[0]);
         write(pipes2[1],child_send_buf,1);
         exit(0);
     } else{
@@ -33,7 +33,7 @@ int main(int argc,char * argv[]){
         write(pipes1[1],parent_send_buf,1);
         read(pipes2[0],parent_recv_buf,1);
         printf("%d: received pong\n", pid);
-        printf("%d: received number %d\n",pid ,parent_recv_buf);
+        printf("%d: received number %d\n",pid ,parent_recv_buf[0]);
 
         exit(0);
     }
