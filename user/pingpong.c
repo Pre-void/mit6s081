@@ -31,7 +31,7 @@ int main(int argc,char * argv[]){
 
         write(pipes1[1],parent_send_buf,1);
         read(pipes2[0],parent_recv_buf,1);
-        printf("%d: received ping\n", pid);
+        printf("%d: received pong\n", pid);
         exit(0);
     }
 }
