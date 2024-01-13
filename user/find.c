@@ -45,6 +45,11 @@ void find(char * curr_path,char * target){
         fprintf(2,"find: cannot open %s\n",curr_path);
         return;
     }
+    if (fstat(fd, &st) < 0) {
+        fprintf(2, "find: cannot stat %s\n", curr_path);
+        close(fd);
+        return;
+    }
 
     switch (st.type) {
         char * f_name;
