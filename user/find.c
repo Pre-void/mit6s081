@@ -77,7 +77,7 @@ void find(char * curr_path,char * target){
             while (read(fd,&de,sizeof(de)) == sizeof(de)){
                 //                printf("%s   %d\n", de.name,de.inum);
                 /**文件无效或者当前目录或者父目录**/
-                if(de.inum == 0 || strcmp(de.name,".") || strcmp(de.name,"..") == 0){
+                if(de.inum == 0 || strcmp(de.name,".") == 0 || strcmp(de.name,"..") == 0){
                     continue;
                 }
                 /**文件名复制到p**/
