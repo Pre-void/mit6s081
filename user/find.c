@@ -40,7 +40,7 @@ void find(char * curr_path,char * target){
     /**int open(const char*, int);
      * 第一个参数是文件路径
      * 第二个参数指定文件标志位O_RDONLY（只读）、O_WRONLY（只写）、O_RDWR（读写）等。
-     * 以只读方式打开文件夹，若打开失败，返回-1，程序结束**/
+     * 以只读方式打开文件夹， 若打开失败，返回-1，程序结束**/
     if((fd = open(curr_path,O_RDONLY)) < 0){
         fprintf(2,"find: cannot open %s\n",curr_path);
         return;
