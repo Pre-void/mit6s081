@@ -64,7 +64,7 @@ int main(int argc,char * argv[]){
     for (int i = 2; i <=35; ++i) {
         write(pipes[1],&i,4);
     }
-    /**关闭写入端口**/
+    /**关闭写入端口 **/
     close(pipes[1]);
     runprocess(pipes[0]);
     exit(0);
