@@ -126,7 +126,7 @@ found:
   memset(&p->context, 0, sizeof(p->context));
   p->context.ra = (uint64)forkret;
   p->context.sp = p->kstack + PGSIZE;
-
+  p->tracemask = 0;
   return p;
 }
 
@@ -266,6 +266,8 @@ fork(void)
   if((np = allocproc()) == 0){
     return -1;
   }
+  /**fork出的新进程继承父进程的bitmask**/
+  np->tracemask = p->tracemask;
 
   // Copy user memory from parent to child.
   if(uvmcopy(p->pagetable, np->pagetable, p->sz) < 0){
