@@ -99,10 +99,13 @@ sys_uptime(void)
 uint64
 sys_trace(void){
     int trace_sys_mask;
-    printf("hhhhhhhhhhhhhhh===%d\n",trace_sys_mask);
+    /**argint用于从用户程序传递给系统调用的参数中提取整数值。
+     * 如果提取成功返回值为0
+     * 提取失败返回值为   -1**/
     if(argint(0,&trace_sys_mask) < 0){
         return -1;
     }
+    printf("hhhhhhhhhhhhhhh===%d\n",trace_sys_mask);
     myproc()->tracemask |= trace_sys_mask;
     return 0;
 }
