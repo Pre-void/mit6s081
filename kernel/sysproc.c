@@ -99,7 +99,7 @@ sys_uptime(void)
 uint64
 sys_trace(void){
     int trace_sys_mask;
-    printf("hhhhhhhhhhhhhhh===%d\n",trace_sys_mask)
+    printf("hhhhhhhhhhhhhhh===%d\n",trace_sys_mask);
     if(argint(0,&trace_sys_mask) < 0){
         return -1;
     }
