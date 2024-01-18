@@ -58,7 +58,9 @@ cpuid()
 // Interrupts must be disabled.
 struct cpu*
 mycpu(void) {
+  /**获取当前 CPU 的标识符**/
   int id = cpuid();
+  /**获取了当前运行的 CPU 的结构体。**/
   struct cpu *c = &cpus[id];
   return c;
 }
@@ -67,7 +69,9 @@ mycpu(void) {
 struct proc*
 myproc(void) {
   push_off();
+  /**获取当前cpu信息**/
   struct cpu *c = mycpu();
+  /**获取当前 CPU 上正在运行的进程的 struct proc 结构体指针**/
   struct proc *p = c->proc;
   pop_off();
   return p;
@@ -76,10 +80,14 @@ myproc(void) {
 int
 allocpid() {
   int pid;
-  
+  /**获取全局锁，确保在分配进程ID时，每个进程能够独占访问和更新全局变量nextpid，
+   * 防止多个进程同时修改nextpid，导致pid分配错误**/
   acquire(&pid_lock);
+  /**nextpid是全局变量，将nextpid当前的值分配给新创建的进程**/
   pid = nextpid;
+  /**nextpid 加一，作为下一个创建的进程的pid**/
   nextpid = nextpid + 1;
+  /**释放全局锁，让别的进程也可以修改nextpid**/
   release(&pid_lock);
 
   return pid;
@@ -89,26 +97,36 @@ allocpid() {
 // If found, initialize state required to run in the kernel,
 // and return with p->lock held.
 // If there are no free procs, or a memory allocation fails, return 0.
+/**创建一个新的进程结构并对其进行初始化，为新的进程提供必要的资源和上下文，以便将来执行该进程。**/
 static struct proc*
 allocproc(void)
 {
   struct proc *p;
-
+  // 遍历进程数组，尝试获取进程锁
   for(p = proc; p < &proc[NPROC]; p++) {
     acquire(&p->lock);
-    if(p->state == UNUSED) {
+      // 如果进程状态为 UNUSED，表示找到一个未被使用的进程结构
+      if(p->state == UNUSED) {
       goto found;
     } else {
-      release(&p->lock);
+          /**如果进程状态不是 UNUSED，可能是就绪态，阻塞态或者僵尸状态，
+           * 说明当前遍历到的proc已经被某个进程关联，释放锁**/
+          release(&p->lock);
     }
   }
   return 0;
 
 found:
+  /**分配pid**/
   p->pid = allocpid();
 
   // Allocate a trapframe page.
+  /**kalloc 是一个用于分配内核内存的函数。它主要用于在内核空间中分配物理页框（Page Frame），
+   * 物理页框的大小是 4096 字节（4 KB）这些页框通常用于存储内核数据结构、内核栈、页表等内核级别的数据。
+   * 申请成功返回的是物理页框的地址，申请失败返回的是NULL，也就是0
+   * **/
   if((p->trapframe = (struct trapframe *)kalloc()) == 0){
+    /**申请失败就释放掉进程的锁，返回0**/
     release(&p->lock);
     return 0;
   }
@@ -124,7 +142,10 @@ found:
   // Set up new context to start executing at forkret,
   // which returns to user space.
   memset(&p->context, 0, sizeof(p->context));
+  /**新进程被创建后都会执行forkret，执行一些初始化操作，确保新进程能够正常执行
+   * 在这里forkret是函数入口地址，在这里起返回地址的作用，当新进程被调度的时候执行forkret**/
   p->context.ra = (uint64)forkret;
+  /**p->kstack最开始是内核页的0地址，因为栈是由高地址向低地址，所以+PGSIZE放到页尾**/
   p->context.sp = p->kstack + PGSIZE;
   p->tracemask = 0;
   return p;
@@ -168,8 +189,14 @@ proc_pagetable(struct proc *p)
   // at the highest user virtual address.
   // only the supervisor uses it, on the way
   // to/from user space, so not PTE_U.
+  /**将trampline代码映射到用户页表的目的是为了在用户状态下执行这些汇编代码。
+   * 当一个用户程序执行系统调用时会触发用户态到内核态的转换，会涉及到保存用户
+   * 程序上下文，然后跳转到内核中执行相应的系统调用服务例程。执行完系统调用后
+   * 需要再次返回用户程序，并恢复上下文。
+   * 无论是用户态-》内核态还是内核态-》用户态都需要trampoline**/
   if(mappages(pagetable, TRAMPOLINE, PGSIZE,
               (uint64)trampoline, PTE_R | PTE_X) < 0){
+    /**释放用户页表（pagetable）及其管理的虚拟地址空间**/
     uvmfree(pagetable, 0);
     return 0;
   }
@@ -177,6 +204,7 @@ proc_pagetable(struct proc *p)
   // map the trapframe just below TRAMPOLINE, for trampoline.S.
   if(mappages(pagetable, TRAPFRAME, PGSIZE,
               (uint64)(p->trapframe), PTE_R | PTE_W) < 0){
+    /**取消TRAMPOLINE建立好的映射**/
     uvmunmap(pagetable, TRAMPOLINE, 1, 0);
     uvmfree(pagetable, 0);
     return 0;

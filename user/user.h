@@ -1,6 +1,11 @@
 struct stat;
 struct rtcdate;
 
+
+/**定user.h 提供了用户程序与底层操作系统之间的接口，
+ * 通过这些声明，用户程序可以使用系统调用和库函数来实现各种功能。
+ * 用户只能使用在user.h里声明的系统调用**/
+
 // system calls
 int fork(void);
 int exit(int) __attribute__((noreturn));

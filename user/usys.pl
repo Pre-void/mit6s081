@@ -7,9 +7,14 @@ print "#include \"kernel/syscall.h\"\n";
 
 sub entry {
     my $name = shift;
+    #将标签 trace 声明为全局标签，使得它能够在整个程序的不同模块之间被访问和引用。
     print ".global $name\n";
     print "${name}:\n";
+    #SYS_name是在syscall.h定义的系统调用号码
+    #li 将一个立即数（immediate value）加载到一个寄存器中
     print " li a7, SYS_${name}\n";
+    #用于进入内核空间执行系统调用。
+    #具体的系统调用是由寄存器 a7 中的值来确定的
     print " ecall\n";
     print " ret\n";
 }

@@ -106,6 +106,8 @@ extern uint64 sys_write(void);
 extern uint64 sys_uptime(void);
 extern uint64 sys_trace(void);
 
+
+/**系统调用对应的数组,中括号[]是指定索引，从1开始，0没有对应的系统调用**/
 static uint64 (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
 [SYS_exit]    sys_exit,
@@ -163,9 +165,11 @@ syscall(void)
 {
   int num;
   struct proc *p = myproc();
-
+  /**获取系统调用号**/
   num = p->trapframe->a7;
+  /**检查系统调用号是否在合法范围内，以及系统调用是否存在**/
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
+    /**将系统调用返回值存在a0寄存器**/
     p->trapframe->a0 = syscalls[num]();
     if(p->tracemask & (1 << num)){
         printf("%d: syscall %s -> %d\n",p->pid,sysnames[num],p->trapframe->a0);

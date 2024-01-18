@@ -184,4 +184,6 @@ void            virtio_disk_rw(struct buf *, int);
 void            virtio_disk_intr(void);
 
 // number of elements in fixed-size array
+/**计算数组 x 的元素个数，它使用了 sizeof 运算符获取整个数组的字节大小，
+ * 然后除以单个元素的字节大小。这样就能得到数组的元素个数。**/
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))
