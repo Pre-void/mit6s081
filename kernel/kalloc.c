@@ -89,7 +89,7 @@ kalloc(void)
 
 
 uint64
-kfreemen(void){
+kfreemem(void){
     struct run * r;
     uint64 free = 0;   //  空闲页面的大小
     acquire(&kmem.lock);
