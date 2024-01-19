@@ -131,9 +131,6 @@ sys_sysinfo(void){
     struct sysinfo s;
     s.freemem = kfreemem();
     s.nproc  = count_free_proc();
-
-
-
     if(copyout(my_proc->pagetable,p,(char *)&s, sizeof(s)) < 0){
         return -1;
     }
