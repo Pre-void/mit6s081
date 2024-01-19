@@ -117,8 +117,7 @@ sys_trace(void){
     return 0;
 }
 
-uint64 kfreemem(void);
-uint64 count_free_proc(void);
+
 
 uint64
 sys_sysinfo(void){
