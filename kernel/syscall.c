@@ -105,6 +105,7 @@ extern uint64 sys_wait(void);
 extern uint64 sys_write(void);
 extern uint64 sys_uptime(void);
 extern uint64 sys_trace(void);
+extern uint64 sys_sysinfo(void)
 
 
 /**系统调用对应的数组,中括号[]是指定索引，从1开始，0没有对应的系统调用**/
@@ -131,6 +132,7 @@ static uint64 (*syscalls[])(void) = {
 [SYS_mkdir]   sys_mkdir,
 [SYS_close]   sys_close,
 [SYS_trace]   sys_trace,
+[SYS_sysinfo] sys_sysinfo,
 };
 
 static char *sysnames[] = {
@@ -157,6 +159,7 @@ static char *sysnames[] = {
         "mkdir",
         "close",
         "trace",
+        "sysinfo"
 };
 
 
