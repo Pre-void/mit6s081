@@ -167,6 +167,8 @@ syscall(void)
   struct proc *p = myproc();
   /**获取系统调用号**/
   num = p->trapframe->a7;
+  printf("=================%d: syscall %s\n",p->pid,sysnames[num]);
+
   /**检查系统调用号是否在合法范围内，以及系统调用是否存在**/
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
     /**将系统调用返回值存在a0寄存器**/
