@@ -117,6 +117,9 @@ sys_trace(void){
     return 0;
 }
 
+uint64 kfreemem(void);
+uint64 count_free_proc(void);
+
 uint64
 sys_sysinfo(void){
 
@@ -129,6 +132,8 @@ sys_sysinfo(void){
     struct sysinfo s;
     s.freemem = kfreemem();
     s.nproc  = count_free_proc();
+
+
 
     if(copyout(my_proc->pagetable,p,(char *)&s, sizeof(s)) < 0){
         return -1;
