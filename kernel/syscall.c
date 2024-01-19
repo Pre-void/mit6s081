@@ -159,7 +159,7 @@ static char *sysnames[] = {
         "mkdir",
         "close",
         "trace",
-        "sysinfo"
+        "sysinfo",
 };
 
 
