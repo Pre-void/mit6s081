@@ -115,3 +115,23 @@ sys_trace(void){
     myproc()->tracemask |= trace_sys_mask;
     return 0;
 }
+
+uint64
+sys_sysinfo(void){
+
+    struct proc * my_proc = myproc();
+    uint64 p;
+    if(argaddr(0,&p)<0){
+        return -1;
+    }
+
+    struct sysinfo s;
+    s.freemem = kfreemem();
+    s.nproc  = count_free_proc();
+
+    if(copyout(my_proc->pagetable,p,(char *)&s, sizeof(s)) < 0){
+        return -1;
+    }
+
+    return 0;
+}

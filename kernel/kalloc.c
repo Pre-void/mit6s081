@@ -17,9 +17,11 @@ extern char end[]; // first address after kernel.
 struct run {
   struct run *next;
 };
-
+/**用于内核内存管理的结构体。**/
 struct {
+  /**自旋锁,确保在同一时刻只有一个线程能够执行对 kmem 结构体的操作，以防止竞态条件。**/
   struct spinlock lock;
+  /**指向空闲内存块的链表。这些内存块可以在需要时被分配给内核或用户程序。**/
   struct run *freelist;
 } kmem;
 
@@ -69,14 +71,35 @@ void *
 kalloc(void)
 {
   struct run *r;
-
+  /**获取内存分配的锁**/
   acquire(&kmem.lock);
+  /**保存链表头部的**/
   r = kmem.freelist;
+  /**如果不为空，将链表头后移，表示取出了一个空闲链表**/
   if(r)
     kmem.freelist = r->next;
+  /**释放锁**/
   release(&kmem.lock);
 
+  /**将这个页的内容设置为5**/
   if(r)
     memset((char*)r, 5, PGSIZE); // fill with junk
   return (void*)r;
+}
+
+
+uint64
+kfreemen(void){
+    struct run * r;
+    uint64 free = 0;   //  空闲页面的大小
+    acquire(&kmem.lock);
+    /**遍历空闲链表，计算总共的空闲大小**/
+    r = kmem.freelist;
+    while (r){
+        free += PGSIZE;
+        r = r->next;
+    }
+    release(&kmem.lock);
+    /**返回总共空闲链表的大小**/
+    return free;
 }

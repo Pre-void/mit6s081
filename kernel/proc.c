@@ -723,3 +723,19 @@ procdump(void)
     printf("\n");
   }
 }
+
+uint64
+count_free_proc(void){
+    struct proc *p;
+    uint64 count = 0;
+    /**遍历进程链表,记录没有和活跃进程关联的proc数据结构**/
+    for (p = proc; p < &proc[NPROC]; p++) {
+        acquire(&p->lock);
+        if(p->state != UNUSED){
+            count += 1;
+        }
+        release(&p->lock);
+    }
+    /**返回空闲计数**/
+    return count;
+}

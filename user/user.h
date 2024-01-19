@@ -1,6 +1,8 @@
 struct stat;
 struct rtcdate;
 
+/**提前声明**/
+struct sysinfo;
 
 /**定user.h 提供了用户程序与底层操作系统之间的接口，
  * 通过这些声明，用户程序可以使用系统调用和库函数来实现各种功能。
@@ -30,6 +32,8 @@ int sleep(int);
 int uptime(void);
 /**新添加的系统调用trace,函数原型签名**/
 int trace(int);
+/**新添加的系统调用sysinfo,函数原型签名**/
+int sysinfo(struct sysinfo *);
 
 // ulib.c
 int stat(const char*, struct stat*);
