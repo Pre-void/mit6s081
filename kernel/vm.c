@@ -196,6 +196,7 @@ uvmunmap(pagetable_t pagetable, uint64 va, uint64 npages, int do_free)
 
 // create an empty user page table.
 // returns 0 if out of memory.
+/**创建空页表**/
 pagetable_t
 uvmcreate()
 {
@@ -277,8 +278,13 @@ freewalk(pagetable_t pagetable)
   // there are 2^9 = 512 PTEs in a page table.
   for(int i = 0; i < 512; i++){
     pte_t pte = pagetable[i];
+    /**对于每个页表项，首先检查是否有效，也就是PTE_V是否设置，并且是否有读/写/执行权限，如果没有，说明指向另一个页表**/
     if((pte & PTE_V) && (pte & (PTE_R|PTE_W|PTE_X)) == 0){
       // this PTE points to a lower-level page table.
+      /**转向下一级页表，右移10位获取页号，左移12位获得实际物理地址
+       * 页表地址一定是4096字节对齐的，所以PTE的低12位在做寻址时肯定会清零，
+       * 所以PTE的低12位可以作为PTE属性，Xv6只使用了低10位来表示PTE的属性，
+       * 比如 该内存可读、可写、可执行、是否共享、用户操作权限、内核操作权限等等属性**/
       uint64 child = PTE2PA(pte);
       freewalk((pagetable_t)child);
       pagetable[i] = 0;
@@ -439,4 +445,34 @@ copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max)
   } else {
     return -1;
   }
+}
+
+
+void vmprint_helper(pagetable_t pagetable,int depth){
+    static char * indent[] = {
+            "",
+            "..",
+            ".. ..",
+            ".. .. .."
+    };
+
+    if(depth <= 0|| depth >= 4){
+        panic("vmprint_helper: depth not in {1, 2, 3}");
+    }
+
+    for (int i = 0; i < 512; ++i) {
+        pte_t pte = pagetable[i];
+        if(pte & PTE_V){
+            printf("%s%d: pte %p pa %p\n",indent[depth],i,pte, PTE2PA(pte));
+            if((pte & (PTE_R | PTE_W | PTE_X)) == 0){
+                uint64 child = PTE2PA(pte);
+                vmprint_helper((pagetable)child,depth+1);
+            }
+        }
+    }
+}
+
+void vmprint(pagetable_t pagetable){
+    printf("page table %p\n",pagetable);
+    vmprint_helper(pagetable,1);
 }

@@ -11,6 +11,7 @@
 
 void freerange(void *pa_start, void *pa_end);
 
+/**指向内核结束后的第一个地址。**/
 extern char end[]; // first address after kernel.
                    // defined by kernel.ld.
 
@@ -43,11 +44,13 @@ freerange(void *pa_start, void *pa_end)
 // which normally should have been returned by a
 // call to kalloc().  (The exception is when
 // initializing the allocator; see kinit above.)
+
+/**用于释放由 kalloc() 分配的物理内存页面。**/
 void
 kfree(void *pa)
 {
   struct run *r;
-
+  /**指针 pa 指向的地址是在页面中的偏移量。如果这个偏移量不是页面大小的整数倍，则说明pa指向的地址不是页面的起始地址**/
   if(((uint64)pa % PGSIZE) != 0 || (char*)pa < end || (uint64)pa >= PHYSTOP)
     panic("kfree");
 
