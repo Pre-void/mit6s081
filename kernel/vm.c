@@ -466,7 +466,7 @@ void vmprint_helper(pagetable_t pagetable,int depth){
             printf("%s%d: pte %p pa %p\n",indent[depth],i,pte, PTE2PA(pte));
             if((pte & (PTE_R | PTE_W | PTE_X)) == 0){
                 uint64 child = PTE2PA(pte);
-                vmprint_helper((pagetable)child,depth+1);
+                vmprint_helper((pagetable_t)child, depth+1);
             }
         }
     }
