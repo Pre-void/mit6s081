@@ -447,34 +447,27 @@ copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max)
   }
 }
 
-// Recursive helper
-void vmprint_helper(pagetable_t pagetable, int depth) {
-    static char* indent[] = {
-            "",
-            "..",
-            ".. ..",
-            ".. .. .."
-    };
-    if (depth <= 0 || depth >= 4) {
-        panic("vmprint_helper: depth not in {1, 2, 3}");
+void vmprint(pagetable_t pagetable, uint64 lv)
+{
+    char *vmarr[4];
+    vmarr[0] = "..";
+    vmarr[1] = ".. ..";
+    vmarr[2] = ".. .. ..";
+    if (lv > 2)
+        return;
+    if (lv == 0)
+    {
+        printf("page table %p\n", pagetable);
     }
-    // there are 2^9 = 512 PTES in a page table.
-    for (int i = 0; i < 512; i++) {
+    for (int i = 0; i < 512; i++)
+    {
         pte_t pte = pagetable[i];
-        if (pte & PTE_V) {
-            printf("%s%d: pte %p pa %p\n", indent[depth], i, pte, PTE2PA(pte));
-            if ((pte & (PTE_R|PTE_W|PTE_X)) == 0) {
-                // points to a lower-level page table
-                uint64 child = PTE2PA(pte);
-                vmprint_helper((pagetable_t)child, depth+1);
-            }
+        if (pte & PTE_V)
+        {
+            // this PTE points to a lower-level page table.
+            uint64 child = PTE2PA(pte);
+            printf("%s%d: pte %p pa %p\n", vmarr[lv], i, pte, child);
+            vmprint((pagetable_t)child, lv + 1);
         }
     }
-}
-
-// Utility func to print the valid
-// PTEs within a page table recursively
-void vmprint(pagetable_t pagetable) {
-    printf("page table %p\n", pagetable);
-    vmprint_helper(pagetable, 1);
 }
