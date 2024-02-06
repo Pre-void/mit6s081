@@ -447,27 +447,60 @@ copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max)
   }
 }
 
-void vmprint(pagetable_t pagetable, uint64 lv)
+
+
+char* prefix[] = {".. .. ..", ".. ..", ".."};
+
+void _vmprint(pagetable_t pagetable, int level)
+
 {
-    char *vmarr[4];
-    vmarr[0] = "..";
-    vmarr[1] = ".. ..";
-    vmarr[2] = ".. .. ..";
-    if (lv > 2)
-        return;
-    if (lv == 0)
+
+    int idx = 0;
+
+    int pgtbl_size = 512;
+
+    while(idx < pgtbl_size)
+
     {
-        printf("page table %p\n", pagetable);
-    }
-    for (int i = 0; i < 512; i++)
-    {
-        pte_t pte = pagetable[i];
-        if (pte & PTE_V)
+
+        pte_t *pte = &pagetable[idx++];
+
+        // 检查该页是否 valid
+
+        if (!(*pte & PTE_V))
+
         {
-            // this PTE points to a lower-level page table.
-            uint64 child = PTE2PA(pte);
-            printf("%s%d: pte %p pa %p\n", vmarr[lv], i, pte, child);
-            vmprint((pagetable_t)child, lv + 1);
+
+            continue;
+
         }
+
+
+
+        printf("%s%d: pte %p pa %p\n", prefix[level], idx - 1, *pte, PTE2PA(*pte));
+
+
+
+        if (level)
+
+        {
+
+            _vmprint((pagetable_t)PTE2PA(*pte), level - 1);
+
+        }
+
     }
+
+}
+
+
+
+void vmprint(pagetable_t pagetable)
+
+{
+
+    printf("page table %p\n", pagetable);
+
+    _vmprint(pagetable, 2);
+
 }
