@@ -447,32 +447,34 @@ copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max)
   }
 }
 
-
-void vmprint_helper(pagetable_t pagetable,int depth){
-    static char * indent[] = {
+// Recursive helper
+void vmprint_helper(pagetable_t pagetable, int depth) {
+    static char* indent[] = {
             "",
             "..",
             ".. ..",
             ".. .. .."
     };
-
-    if(depth <= 0|| depth >= 4){
+    if (depth <= 0 || depth >= 4) {
         panic("vmprint_helper: depth not in {1, 2, 3}");
     }
-
-    for (int i = 0; i < 512; ++i) {
+    // there are 2^9 = 512 PTES in a page table.
+    for (int i = 0; i < 512; i++) {
         pte_t pte = pagetable[i];
-        if(pte & PTE_V){
-            printf("%s%d: pte %p pa %p\n",indent[depth],i,pte, PTE2PA(pte));
-            if((pte & (PTE_R | PTE_W | PTE_X)) == 0){
+        if (pte & PTE_V) { //是一个有效的PTE
+            printf("%s%d: pte %p pa %p\n", indent[depth], i, pte, PTE2PA(pte));
+            if ((pte & (PTE_R|PTE_W|PTE_X)) == 0) {
+                // points to a lower-level page table 并且是间接层PTE
                 uint64 child = PTE2PA(pte);
-                vmprint_helper((pagetable_t)child, depth+1);
+                vmprint_helper((pagetable_t)child, depth+1); // 递归, 深度+1
             }
         }
     }
 }
 
-void vmprint(pagetable_t pagetable){
-    printf("page table %p\n",pagetable);
-    vmprint_helper(pagetable,1);
+// Utility func to print the valid
+// PTEs within a page table recursively
+void vmprint(pagetable_t pagetable) {
+    printf("page table %p\n", pagetable);
+    vmprint_helper(pagetable, 1);
 }
