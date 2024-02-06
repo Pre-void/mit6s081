@@ -461,12 +461,12 @@ void vmprint_helper(pagetable_t pagetable, int depth) {
     // there are 2^9 = 512 PTES in a page table.
     for (int i = 0; i < 512; i++) {
         pte_t pte = pagetable[i];
-        if (pte & PTE_V) { //是一个有效的PTE
+        if (pte & PTE_V) {
             printf("%s%d: pte %p pa %p\n", indent[depth], i, pte, PTE2PA(pte));
             if ((pte & (PTE_R|PTE_W|PTE_X)) == 0) {
-                // points to a lower-level page table 并且是间接层PTE
+                // points to a lower-level page table
                 uint64 child = PTE2PA(pte);
-                vmprint_helper((pagetable_t)child, depth+1); // 递归, 深度+1
+                vmprint_helper((pagetable_t)child, depth+1);
             }
         }
     }
