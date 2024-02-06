@@ -448,59 +448,31 @@ copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max)
 }
 
 
+void vmprint_helper(pagetable_t pagetable,int depth){
+    static char * indent[] = {
+            "",
+            "..",
+            ".. ..",
+            ".. .. .."
+    };
 
-char* prefix[] = {".. .. ..", ".. ..", ".."};
-
-void _vmprint(pagetable_t pagetable, int level)
-
-{
-
-    int idx = 0;
-
-    int pgtbl_size = 512;
-
-    while(idx < pgtbl_size)
-
-    {
-
-        pte_t *pte = &pagetable[idx++];
-
-        // 检查该页是否 valid
-
-        if (!(*pte & PTE_V))
-
-        {
-
-            continue;
-
-        }
-
-
-
-        printf("%s%d: pte %p pa %p\n", prefix[level], idx - 1, *pte, PTE2PA(*pte));
-
-
-
-        if (level)
-
-        {
-
-            _vmprint((pagetable_t)PTE2PA(*pte), level - 1);
-
-        }
-
+    if(depth <= 0|| depth >= 4){
+        panic("vmprint_helper: depth not in {1, 2, 3}");
     }
 
+    for (int i = 0; i < 512; ++i) {
+        pte_t pte = pagetable[i];
+        if(pte & PTE_V){
+            printf("%s%d: pte %p pa %p\n",indent[depth],i,pte, PTE2PA(pte));
+            if((pte & (PTE_R | PTE_W | PTE_X)) == 0){
+                uint64 child = PTE2PA(pte);
+                vmprint_helper((pagetable_t)child, depth+1);
+            }
+        }
+    }
 }
 
-
-
-void vmprint(pagetable_t pagetable)
-
-{
-
-    printf("page table %p\n", pagetable);
-
-    _vmprint(pagetable, 2);
-
+void vmprint(pagetable_t pagetable){
+    printf("page table %p\n",pagetable);
+    vmprint_helper(pagetable,1);
 }
